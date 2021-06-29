@@ -80,6 +80,9 @@ ipython_config.py
 # pyenv
 .python-version
 
+# My gitignores
+.idea/
+
 # celery beat schedule file
 celerybeat-schedule
 
