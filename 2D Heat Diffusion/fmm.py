@@ -97,6 +97,9 @@ that we want.
 import numpy as np
 import heapq
 import matplotlib.pyplot as plt
+import matplotlib.animation as animation
+from tqdm import tqdm
+import sys
 
 
 class Voxel:
@@ -239,49 +242,98 @@ class FMMDistance:
         """
         runs iterate until all distances are calculated
         """
-        while self.list_nb:
+        iteration = 0
+        # dist_map = []
+
+        def generator():
+            while self.list_nb != []:
+                yield
+
+        for _ in tqdm(generator(), desc="Calculating Distance", file=sys.stdout):
             self.iterate()
+            iteration += 1
+            # dist_map.append(np.array([[self.mat[i][j].get_value() for i in range(self.grid_size)]
+            #                           for j in range(self.grid_size)]))
+
+        print(f"Calculations finished with {iteration} iterations.")
+        # return iteration, dist_map
 
 
 if __name__ == "__main__":
     np.set_printoptions(linewidth=200, formatter={'float': lambda x: "{0:0.3f}".format(x)})
 
-    fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(18, 5), facecolor='white')
+    def create_anim(source_type, init, sz):
+        plt.clf()
+        fig, ax = plt.subplots(facecolor='white')
 
-    # One source
-    grid_size = 100
+        dm = FMMDistance(init, sz)
+        max_iter, fmm_mp = dm.calculate_distance()
+
+        cax = ax.pcolormesh(fmm_mp[0], cmap=plt.cm.jet.reversed(), vmin=0, vmax=np.amax(fmm_mp[len(fmm_mp)-1]))
+        fig.colorbar(cax)
+
+        def animate(i):
+            ax.set_title(f"FMM Animation: {i}/{max_iter}")
+            cax.set_array(fmm_mp[i].flatten())
+
+        anim = animation.FuncAnimation(fig, animate, repeat_delay=2000,
+                                       interval=100, frames=tqdm(range(int(max_iter)), desc="Creating Animation"))
+        anim.save(f'{source_type}_source_fmm.gif')
+        plt.show()
+
+        print("Done")
+
+    grid_size = 20
     initial_conditions = [(int(.5*grid_size), int(.5*grid_size))]
-    dm = FMMDistance(initial_conditions, grid_size)
-    dm.calculate_distance()
-    print(np.array(dm.mat), '\n')
-    plt_mat = np.array([[dm.mat[i][j].get_value() for i in range(grid_size)] for j in range(grid_size)])
-    print(np.array(plt_mat))
-    ax1.pcolormesh(plt_mat, cmap=plt.cm.jet.reversed())
-    ax1.set_title("My FMM: one-source")
+    create_anim("one_slow", init=initial_conditions, sz=grid_size)
 
-    # Two source
-    grid_size = 100
-    initial_conditions = [(int(.25*grid_size), int(.5*grid_size)), (int(.75*grid_size), int(.5*grid_size))]
-    dm = FMMDistance(initial_conditions, grid_size)
-    dm.calculate_distance()
-    print(np.array(dm.mat), '\n')
-    plt_mat = np.array([[dm.mat[i][j].get_value() for i in range(grid_size)] for j in range(grid_size)])
-    print(np.array(plt_mat))
-    ax2.pcolormesh(plt_mat, cmap=plt.cm.jet.reversed())
-    ax2.set_title("My FMM: two-source")
+    # grid_size = 100
+    # initial_conditions = [(int(.5*grid_size), int(.5*grid_size))]
+    # create_anim("one", init=initial_conditions, sz=grid_size)
+    #
+    # initial_conditions = [(int(.25*grid_size), int(.5*grid_size)), (int(.75*grid_size), int(.5*grid_size))]
+    # create_anim("two", init=initial_conditions, sz=grid_size)
+    #
+    # spots = [(.5, .25), (.25, .5), (.5, .75), (.75, .5), (.32, .32), (.68, .68), (.68, .32), (.32, .68)]
+    # initial_conditions = [(int(grid_size * spots[i][0]), int(grid_size*spots[i][1])) for i in range(len(spots))]
+    # create_anim("ring", init=initial_conditions, sz=grid_size)
 
-    # Ring
-    grid_size = 100
-    spots = [(.5, .25), (.25, .5), (.5, .75), (.75, .5), (.32, .32), (.68, .68), (.68, .32), (.32, .68)]
-    initial_conditions = [(int(grid_size * spots[i][0]), int(grid_size*spots[i][1])) for i in range(len(spots))]
-    print(initial_conditions)
-    dm = FMMDistance(initial_conditions, grid_size)
-    dm.calculate_distance()
-    print(np.array(dm.mat), '\n')
-    plt_mat = np.array([[dm.mat[i][j].get_value() for i in range(grid_size)] for j in range(grid_size)])
-    print(np.array(plt_mat))
-    ax3.pcolormesh(plt_mat, cmap=plt.cm.jet.reversed())
-    ax3.set_title("My FMM: ring of sources")
-    plt.savefig("fmm.png")
+    # fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(18, 5), facecolor='white')
 
-    plt.show()
+    # # One source
+    # grid_size = 100
+    # initial_conditions = [(int(.5*grid_size), int(.5*grid_size))]
+    # dm = FMMDistance(initial_conditions, grid_size)
+    # dm.calculate_distance()
+    # print(np.array(dm.mat), '\n')
+    # plt_mat = np.array([[dm.mat[i][j].get_value() for i in range(grid_size)] for j in range(grid_size)])
+    # print(np.array(plt_mat))
+    # ax1.pcolormesh(plt_mat, cmap=plt.cm.jet.reversed())
+    # ax1.set_title("My FMM: one-source")
+    #
+    # # Two source
+    # grid_size = 100
+    # initial_conditions = [(int(.25*grid_size), int(.5*grid_size)), (int(.75*grid_size), int(.5*grid_size))]
+    # dm = FMMDistance(initial_conditions, grid_size)
+    # dm.calculate_distance()
+    # print(np.array(dm.mat), '\n')
+    # plt_mat = np.array([[dm.mat[i][j].get_value() for i in range(grid_size)] for j in range(grid_size)])
+    # print(np.array(plt_mat))
+    # ax2.pcolormesh(plt_mat, cmap=plt.cm.jet.reversed())
+    # ax2.set_title("My FMM: two-source")
+    #
+    # # Ring
+    # grid_size = 100
+    # spots = [(.5, .25), (.25, .5), (.5, .75), (.75, .5), (.32, .32), (.68, .68), (.68, .32), (.32, .68)]
+    # initial_conditions = [(int(grid_size * spots[i][0]), int(grid_size*spots[i][1])) for i in range(len(spots))]
+    # print(initial_conditions)
+    # dm = FMMDistance(initial_conditions, grid_size)
+    # dm.calculate_distance()
+    # print(np.array(dm.mat), '\n')
+    # plt_mat = np.array([[dm.mat[i][j].get_value() for i in range(grid_size)] for j in range(grid_size)])
+    # print(np.array(plt_mat))
+    # ax3.pcolormesh(plt_mat, cmap=plt.cm.jet.reversed())
+    # ax3.set_title("My FMM: ring of sources")
+    # plt.savefig("fmm.png")
+
+    # plt.show()
