@@ -36,18 +36,4 @@ for layer in tqdm(range(0, len(distance_mat), 4), desc='Creating gaussian mat.')
 
     res_mat.append(temp)
 
-
-fig, ax = plt.subplots(facecolor='white')
-cax = ax.pcolormesh(res_mat[0], cmap=plt.cm.jet, vmin=0, vmax=np.amax(res_mat[len(res_mat)-1]))
-fig.colorbar(cax)
-
-def animate(i):
-    ax.set_title(f"FMM Animation: {i}/{len(res_mat)}")
-    cax.set_array(res_mat[i].flatten())
-
-anim = animation.FuncAnimation(fig, animate, repeat_delay=2000,
-                                interval=100, frames=tqdm(range(int(len(res_mat))), desc="Creating Animation"))
-# anim.save(f'{}_source_fmm.gif')
-plt.show()
-
-print("Done")
+    
