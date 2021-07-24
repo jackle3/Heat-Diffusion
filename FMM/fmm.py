@@ -169,6 +169,7 @@ class FMMDistance:
                 self.mat[i][j].set_status_frozen()
                 for vn in self.non_frozen_neighbors(i, j):
                     self.set_distance(vn)
+        print(self.list_nb)
 
     def non_frozen_neighbors(self, i, j):
         """
@@ -209,6 +210,8 @@ class FMMDistance:
             vd2 = self.mat[i][j - 1].get_value()
         else:
             vd2 = min(self.mat[i][j + 1].get_value(), self.mat[i][j - 1].get_value())
+
+        print(v, vd1, vd2)
 
         if abs(vd1 - vd2) <= 1.0 / self.F[i, j]:
             t = .5 * (vd1 + vd2 + np.sqrt((vd1 + vd2) ** 2 - 2 * (vd1 ** 2 + vd2 ** 2 - 1.0 / (self.F[i, j] ** 2))))
@@ -262,30 +265,35 @@ class FMMDistance:
 if __name__ == "__main__":
     np.set_printoptions(linewidth=200, formatter={'float': lambda x: "{0:0.3f}".format(x)})
 
-    def create_anim(source_type, init, sz):
-        plt.clf()
-        fig, ax = plt.subplots(facecolor='white')
+    # def create_anim(source_type, init, sz):
+    #     plt.clf()
+    #     fig, ax = plt.subplots(facecolor='white')
+    #
+    #     dm = FMMDistance(init, sz)
+    #     max_iter, fmm_mp = dm.calculate_distance()
+    #
+    #     cax = ax.pcolormesh(fmm_mp[0], cmap=plt.cm.jet.reversed(), vmin=0, vmax=np.amax(fmm_mp[len(fmm_mp)-1]))
+    #     fig.colorbar(cax)
+    #
+    #     def animate(i):
+    #         ax.set_title(f"FMM Animation: {i}/{max_iter}")
+    #         cax.set_array(fmm_mp[i].flatten())
+    #
+    #     anim = animation.FuncAnimation(fig, animate, repeat_delay=2000,
+    #                                    interval=100, frames=tqdm(range(int(max_iter)), desc="Creating Animation"))
+    #     anim.save(f'{source_type}_source_fmm.gif')
+    #     plt.show()
+    #
+    #     print("Done")
+    #
+    # grid_size = 20
+    # initial_conditions = [(int(.5*grid_size), int(.5*grid_size))]
+    # create_anim("one_slow", init=initial_conditions, sz=grid_size)
 
-        dm = FMMDistance(init, sz)
-        max_iter, fmm_mp = dm.calculate_distance()
+    dm = FMMDistance([(5 , 5)], 10)
+    for item in dm.mat:
+        print(item)
 
-        cax = ax.pcolormesh(fmm_mp[0], cmap=plt.cm.jet.reversed(), vmin=0, vmax=np.amax(fmm_mp[len(fmm_mp)-1]))
-        fig.colorbar(cax)
-
-        def animate(i):
-            ax.set_title(f"FMM Animation: {i}/{max_iter}")
-            cax.set_array(fmm_mp[i].flatten())
-
-        anim = animation.FuncAnimation(fig, animate, repeat_delay=2000,
-                                       interval=100, frames=tqdm(range(int(max_iter)), desc="Creating Animation"))
-        anim.save(f'{source_type}_source_fmm.gif')
-        plt.show()
-
-        print("Done")
-
-    grid_size = 20
-    initial_conditions = [(int(.5*grid_size), int(.5*grid_size))]
-    create_anim("one_slow", init=initial_conditions, sz=grid_size)
 
     # grid_size = 100
     # initial_conditions = [(int(.5*grid_size), int(.5*grid_size))]
