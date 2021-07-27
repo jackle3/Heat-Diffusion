@@ -118,6 +118,8 @@ class MeshReader:
             # Diagonals
             points_map[cell[0]].children_vertices.append(cell[2])
             points_map[cell[2]].children_vertices.append(cell[0])
+            # points_map[cell[1]].children_vertices.append(cell[1])
+            # points_map[cell[3]].children_vertices.append(cell[3])
         for p_key in points_map:
             points_map[p_key].children_vertices = sorted(list(set(points_map[p_key].children_vertices)))
         # Generates the list of indices of adjacent cells
